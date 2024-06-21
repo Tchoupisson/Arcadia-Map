@@ -14,22 +14,29 @@
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        var map = L.map('map').setView([51.505, -0.09], 13);
+        var map = L.map('map').setView([0.18829608793489636, 10.748238574399403], 13);  // Coordonnées de centrage de la carte
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        var markers = [
-            { "lat": 51.505, "lng": -0.09, "popup": "Point d'intérêt 1" },
-            { "lat": 51.515, "lng": -0.1, "popup": "Point d'intérêt 2" },
-            // Ajoutez plus de points selon vos données
-        ];
+        var geojsonData = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [10.748238574399403, 0.18829608793489636]  // Coordonnées converties en longitude et latitude
+                    },
+                    "properties": {
+                        "name": "Nom du Point d'Intérêt"
+                    }
+                }
+            ]
+        };
 
-        markers.forEach(function(marker) {
-            L.marker([marker.lat, marker.lng]).addTo(map)
-                .bindPopup(marker.popup);
-        });
+        L.geoJSON(geojsonData).addTo(map);
     </script>
 </body>
 </html>
