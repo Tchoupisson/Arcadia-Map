@@ -14,12 +14,29 @@
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        var map = L.map('map').setView([0.18829608793489636, 10.748238574399403], 13);  // Coordonnées de centrage de la carte
+        // Initialiser la carte
+        var map = L.map('map', {
+            crs: L.CRS.Simple, // Utiliser le CRS simple pour une image fixe
+            minZoom: -5, // Permettre le zoom arrière
+            maxZoom: 2 // Permettre le zoom avant
+        });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        // Dimensions de l'image de la carte
+        var w = 2048, h = 2048; // Par exemple, 2048x2048 pixels
 
+        // Coordonnées d'image
+        var southWest = map.unproject([0, h], map.getMaxZoom() - 1);
+        var northEast = map.unproject([w, 0], map.getMaxZoom() - 1);
+        var bounds = new L.LatLngBounds(southWest, northEast);
+
+        // Ajouter l'image de la carte
+        L.imageOverlay('arma3_map.png', bounds).addTo(map);
+
+        // Adapter la vue aux limites de l'image
+        map.setMaxBounds(bounds);
+        map.fitBounds(bounds);
+
+        // Exemple de données GeoJSON
         var geojsonData = {
             "type": "FeatureCollection",
             "features": [
@@ -27,7 +44,7 @@
                     "type": "Feature",
                     "geometry": {
                         "type": "Point",
-                        "coordinates": [10.748238574399403, 0.18829608793489636]  // Coordonnées converties en longitude et latitude
+                        "coordinates": [1024, 1024] // Coordonnées x, y dans l'image
                     },
                     "properties": {
                         "name": "Nom du Point d'Intérêt"
@@ -36,7 +53,15 @@
             ]
         };
 
-        L.geoJSON(geojsonData).addTo(map);
+        // Convertir les coordonnées de l'image en coordonnées de la carte et ajouter les points
+        L.geoJSON(geojsonData, {
+            pointToLayer: function (feature, latlng) {
+                var x = feature.geometry.coordinates[0];
+                var y = feature.geometry.coordinates[1];
+                var latlng = map.unproject([x, y], map.getMaxZoom() - 1);
+                return L.marker(latlng).bindPopup(feature.properties.name);
+            }
+        }).addTo(map);
     </script>
 </body>
 </html>
